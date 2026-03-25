@@ -1,0 +1,79 @@
+version: 1
+
+skillsets:
+  - name: skills-scanner
+    description: |
+      Security scanner for AI agent skills. Detects prompt injection, data exfiltration,
+      and malicious code patterns using YARA rules, pattern matching, AST dataflow analysis,
+      and LLM-as-a-judge evaluation.
+
+    skills:
+      - name: scan_skill
+        description: |
+          Scan an AI agent skill for security vulnerabilities including prompt injection,
+          data exfiltration attempts, and malicious code patterns. Returns a structured
+          report with severity-ranked findings and remediation guidance.
+        parameters:
+          type: object
+          properties:
+            skill_path:
+              type: string
+              description: >
+                Local filesystem path or GitHub repo URL (https://github.com/owner/repo)
+                of the skill to scan. Supports Python, JavaScript, TypeScript, YAML, and JSON files.
+              required: true
+            layers:
+              type: array
+              items:
+                type: string
+                enum: [pattern, yara, dataflow, llm]
+              description: >
+                Detection layers to enable. Defaults to all four: pattern, yara, dataflow, llm.
+                Omitting 'llm' runs faster but may miss semantic threats.
+              default: [pattern, yara, dataflow, llm]
+            severity_threshold:
+              type: string
+              enum: [critical, high, medium, low, info]
+              description: Minimum severity level to include in the report. Default is 'low'.
+              default: low
+            max_file_size_kb:
+              type: integer
+              description: Maximum file size to scan in kilobytes. Files exceeding this are skipped.
+              default: 512
+
+        executors:
+          - type: openapi
+            openapi:
+              url: http://localhost:8000/openapi.json
+              auth:
+                type: none
+
+      - name: scan_snippet
+        description: |
+          Scan a raw code or YAML snippet for security threats without needing a full skill path.
+          Useful for quick inline checks during skill authoring.
+        parameters:
+          type: object
+          properties:
+            content:
+              type: string
+              description: Raw code or YAML/JSON content to scan.
+              required: true
+            language:
+              type: string
+              enum: [python, javascript, typescript, yaml, json, auto]
+              description: Language/format of the content. Use 'auto' for automatic detection.
+              default: auto
+            layers:
+              type: array
+              items:
+                type: string
+                enum: [pattern, yara, dataflow, llm]
+              default: [pattern, yara, llm]
+
+        executors:
+          - type: openapi
+            openapi:
+              url: http://localhost:8000/openapi.json
+              auth:
+                type: none
