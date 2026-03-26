@@ -225,38 +225,41 @@ class _TaintVisitor(ast.NodeVisitor):
         # Check for direct taint-source calls that initialize tainted variables
         # (handled in Assign visitor)
 
-        # Check sink calls
+        # Check sink calls — use exact name match to avoid cross-matching
+        # (e.g., Runner.run must NOT trigger the subprocess.run sink rule)
         for sink_name, (severity, category, description) in _ALL_SINKS.items():
-            if name == sink_name or name.endswith(f".{sink_name.split('.')[-1]}"):
-                tainted_args = [
-                    arg for arg in node.args if _is_tainted(arg, self.tainted)
-                ]
-                tainted_kwargs = [
-                    kw for kw in node.keywords if kw.value and _is_tainted(kw.value, self.tainted)
-                ]
+            if name != sink_name:
+                continue
 
-                if tainted_args or tainted_kwargs:
-                    line = node.lineno
-                    snippet = self.source_lines[line - 1].strip() if line <= len(self.source_lines) else ""
-                    self.findings.append(
-                        Finding(
-                            id=f"df-{uuid.uuid4().hex[:8]}",
-                            title=f"Tainted data flows into {name}()",
-                            description=description,
-                            category=category,
-                            severity=severity,
-                            source=DetectionSource.DATAFLOW,
-                            confidence=0.85,
-                            location=CodeLocation(
-                                file=self.filename,
-                                line_start=line,
-                                snippet=snippet[:200],
-                            ),
-                            evidence=snippet[:300],
-                            remediation=_remediation(name),
-                            rule_id=f"dataflow/{sink_name}",
-                        )
+            tainted_args = [
+                arg for arg in node.args if _is_tainted(arg, self.tainted)
+            ]
+            tainted_kwargs = [
+                kw for kw in node.keywords if kw.value and _is_tainted(kw.value, self.tainted)
+            ]
+
+            if tainted_args or tainted_kwargs:
+                line = node.lineno
+                snippet = self.source_lines[line - 1].strip() if line <= len(self.source_lines) else ""
+                self.findings.append(
+                    Finding(
+                        id=f"df-{uuid.uuid4().hex[:8]}",
+                        title=f"Tainted data flows into {name}()",
+                        description=description,
+                        category=category,
+                        severity=severity,
+                        source=DetectionSource.DATAFLOW,
+                        confidence=0.85,
+                        location=CodeLocation(
+                            file=self.filename,
+                            line_start=line,
+                            snippet=snippet[:200],
+                        ),
+                        evidence=snippet[:300],
+                        remediation=_remediation(name),
+                        rule_id=f"dataflow/{sink_name}",
                     )
+                )
 
         self.generic_visit(node)
 

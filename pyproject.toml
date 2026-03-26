@@ -21,7 +21,7 @@ dependencies = [
 ]
 
 [project.scripts]
-skills-scanner = "main:cli"
+skills-scanner = "scanner.cli:cli"
 
 [project.optional-dependencies]
 dev = [
