@@ -201,7 +201,7 @@ async def scan_files(
 
     try:
         prompt = _build_prompt(file_map, prior_findings or [])
-        result = await Runner.run(agent=_SECURITY_JUDGE_AGENT, input=prompt)
+        result = await Runner.run(_SECURITY_JUDGE_AGENT, prompt)
         raw_output: str = result.final_output or ""
 
         parsed = _parse_llm_output(raw_output)

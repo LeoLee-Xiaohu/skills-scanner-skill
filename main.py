@@ -50,7 +50,7 @@ from scanner.models import (
 )
 
 # ── Config ────────────────────────────────────────────────────────────────────
-SUPPORTED_EXTENSIONS = {".py", ".js", ".ts", ".mjs", ".cjs", ".yml", ".yaml", ".json", ".toml", ".env"}
+SUPPORTED_EXTENSIONS = {".py", ".js", ".ts", ".mjs", ".cjs", ".yml", ".yaml", ".json", ".toml", ".env", ".md", ".txt", ".sh"}
 
 console = Console()
 cli = typer.Typer(name="skills-scanner", help="Scan AI agent skills for security threats.")

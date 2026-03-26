@@ -46,7 +46,8 @@ uv sync --quiet 2>/dev/null || {
 
 # ── Run the scanner ────────────────────────────────────────────────────────────
 # Run main.py directly (avoids entry-point path resolution issues across environments)
-uv run python main.py scan "$TARGET_PATH" --json "${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}"
+# Redirect stderr to suppress SDK noise (e.g., "OPENAI_API_KEY is not set") from stdout
+uv run python main.py scan "$TARGET_PATH" --json "${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}" 2>/dev/null
 EXIT_CODE=$?
 
 exit $EXIT_CODE
