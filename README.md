@@ -108,36 +108,62 @@ Skill Files
 
 ## Quick Start
 
+### Option A — As an Anthropic Agent Skill (Claude Code / Claude.ai)
+
 ```bash
-# Install
+# Clone and install into your Claude Code skills directory
+git clone https://github.com/your-org/skills-scanner-skill ~/.claude/skills/skills-scanner
+cd ~/.claude/skills/skills-scanner
+uv sync
+```
+
+#### Use it
+
+Once installed, just tell your agent naturally:
+
+```
+请使用 skills-scanner 扫描我下载的这个 skill：/path/to/downloaded-skill
+
+Use skills-scanner to scan the skill I just downloaded at ~/Downloads/new-skill/
+
+Check if ~/projects/third-party-skill is safe to use
+```
+
+Claude reads `SKILL.md`, runs `scan.sh` via bash, and gives you a **PASS / WARN / FAIL** verdict with a full findings breakdown.
+
+---
+
+### Option B — CLI / standalone
+
+```bash
+# Clone and install
 git clone https://github.com/your-org/skills-scanner-skill
 cd skills-scanner-skill
 uv sync
 
-# Copy and configure environment
-cp .env.example .env
-# Edit .env: add your OPENAI_API_KEY
+# Optional: add your OPENAI_API_KEY for LLM-as-a-judge layer
+cp .env.example .env  # then edit .env
 
-# Scan a local skill directory
-uv run skills-scanner scan /path/to/my-skill
+# Scan a skill directory
+uv run python main.py scan /path/to/my-skill
 
-# Scan without LLM layer (fast, no API key needed)
-uv run skills-scanner scan /path/to/my-skill --no-llm
+# Fast scan — no API key required (skips LLM layer)
+uv run python main.py scan /path/to/my-skill --no-llm
 
-# Scan only specific layers
-uv run skills-scanner scan /path/to/my-skill --layers pattern,yara,dataflow
+# Only specific detection layers
+uv run python main.py scan /path/to/my-skill --layers pattern,yara,dataflow
 
 # Only show HIGH+ findings
-uv run skills-scanner scan /path/to/my-skill --threshold high
+uv run python main.py scan /path/to/my-skill --threshold high
 
-# Get JSON output (for CI integration)
-uv run skills-scanner scan /path/to/my-skill --json
+# JSON output (for CI pipelines)
+uv run python main.py scan /path/to/my-skill --json
 
-# Scan a code snippet from stdin
-echo "eval(user_input)" | uv run skills-scanner scan-snippet --lang python
+# Scan a raw snippet from stdin
+echo "eval(user_input)" | uv run python main.py scan-snippet --lang python
 
 # Start the Copilot skillset HTTP server
-uv run skills-scanner serve
+uv run python main.py serve
 ```
 
 ## Exit Codes
